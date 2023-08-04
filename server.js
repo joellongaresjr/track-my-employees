@@ -99,7 +99,20 @@ const viewAllDepartments = async () => {
   promptUser();
 };
 
-const viewAllRoles = () => {};
+const viewAllRoles = async () => {
+  try {
+    const [results] = await db
+      .promise()
+      .query(
+        "SELECT role.department_id AS id, role.title, role.salary, department.name AS department FROM role INNER JOIN department ON role.department_id = department.id;"
+      );
+    console.log("****** LIST OF YOUR ROLES ******");
+    console.table(results);
+  } catch (err) {
+    throw err;
+  }
+  promptUser();
+};
 
 const viewAllEmployees = () => {
   //query database *async
