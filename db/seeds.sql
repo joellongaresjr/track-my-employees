@@ -21,17 +21,19 @@ VALUES
         ('Recruitment Specialist', 75000, 5),
         ('HR Rep', 75000, 5);
 
--- INSERT INTO employee (first_name, last_name, role_id, manager_id) 
--- VALUES 
---         ('Joel', 'Longares', 1, null),
---         ('Mike', 'Song',2, null),
---         ('John', 'Smith',3, null),
---         ('Keili', 'Nguyen',4, null),
---         ('Matthew', 'Greathouse', 5, 2),
---         ('Alec', 'Paule', 6, 2),
---         ('Kobe', 'Bryant', 7, 3),
---         ('Stephanie', 'Hou',8, 3),
---         ('Faye', 'Acosta', 9, 4),
---         ('Luke', 'Skywalker', 10, 4),
---         ('Ica', 'Yamaguchi',11, 5),
---         ('Timothy', 'Kim',12, 5);
+INSERT INTO employee (first_name, last_name, role_id, manager_id) 
+VALUES 
+        ('Joel', 'Longares', 1, null),
+        ('Mike', 'Song',2, null),
+        ('John', 'Smith',3, null),
+        ('Keili', 'Nguyen',4, null),
+        ('Matthew', 'Greathouse', 5, 2),
+        ('Alec', 'Paule', 6, 2),
+        ('Kobe', 'Bryant', 7, 3),
+        ('Stephanie', 'Hou',8, 3),
+        ('Faye', 'Acosta', 9, 4),
+        ('Luke', 'Skywalker', 10, 4),
+        ('Ica', 'Yamaguchi',11, 5),
+        ('Timothy', 'Kim',12, 5);
+
+
