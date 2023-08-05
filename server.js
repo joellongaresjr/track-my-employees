@@ -14,10 +14,10 @@ const db = mysql.createConnection(
 
 db.connect((err) => {
   if (err) {
-    console.error("error connectecting to this motherfucking database", err);
+    console.error(err);
     return;
   }
-  console.log("connected to this motherfucking database", err);
+  console.log(err);
   promptUser();
 });
 
@@ -129,32 +129,29 @@ const viewAllEmployees = async () => {
   promptUser();
 };
 
-const addNewDepartment = () => {
-  inquirer
-    .prompt([
+const addNewDepartment = async () => {
+  try {
+    const answer = await inquirer.prompt([
       {
         type: "input",
         name: "departmentName",
         message: "What is the name of the department you wish to add?",
       },
-    ])
-    .then(async (answer) => {
-      try {
-        const departmentName = answer.departmentName;
-        await db.promise.query(
-          `INSERT INTO department (name) VALUES ('${departmentName}')`
-        );
-        console.log(`${departmentName} added to department list`);
-        promptUser();
-      } catch (err) {
-        console.error(err);
-      }
-    });
+    ]);
+    const departmentName = answer.departmentName;
+    await db
+      .promise()
+      .query(`INSERT INTO department (name) VALUES ('${departmentName}')`);
+    console.log(`${departmentName} added to department list`);
+  } catch (err) {
+    console.error(err);
+  }
+  promptUser();
 };
 
-const addNewRole = () => {
-  inquirer
-    .prompt([
+const addNewRole = async () => {
+  try {
+    const answer = await inquirer.prompt([
       {
         type: "input",
         name: "roleName",
@@ -165,62 +162,88 @@ const addNewRole = () => {
         name: "salary",
         message: "What is the salary of this role?",
       },
-    ])
-    .then((answer) => {
-      const roleName = answer.roleName;
-      const salary = answer.salary;
+    ]);
 
-     
-      const roleSql = `SELECT name, id FROM department`;
+    const roleName = answer.roleName;
+    const salary = answer.salary;
 
-      db.query(roleSql, (err, data) => {
-        if (err) throw err;
+    const [departments] = await db
+      .promise()
+      .query("SELECT name, id FROM department");
 
-        const departmentChoices = data.map(({ name, id }) => ({
-          name: name,
-          value: id,
-        }));
-
-        inquirer
-          .prompt([
-            {
-              type: "list",
-              name: "departmentId",
-              message: "What department is this role in?",
-              choices: departmentChoices,
-            },
-          ])
-          .then((deptChoice) => {
-            const departmentId = deptChoice.departmentId;
-
-            const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
-
-            db.query(sql, [roleName, salary, departmentId], (err, result) => {
-              if (err) throw err;
-              console.log(`Added ${roleName} to roles!`);
-
-             
-              promptUser();
-            });
-          });
-      });
-    });
-};
-const addNewEmployee = () => {
-  // ask for first and last name of employee you are adding
-  // ask for employees role use [Choices]
-  // in order to execut this, must querly foles first and show in m/c list.
-  // Ask if employee has manager
-  // query employees and display multiple choice
+    const departmentChoices = departments.map(({ name, id }) => ({
+      name: name,
+      value: id,
+    }));
+    const deptChoice = await inquirer.prompt([
+      {
+        type: "list",
+        name: "departmentId",
+        message: "What department is this role in?",
+        choices: departmentChoices,
+      },
+    ]);
+    const departmentId = deptChoice.departmentId;
+    const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
+    await db.promise().query(sql, [roleName, salary, departmentId]);
+    console.log(`Added ${roleName} to the company!`);
+  } catch (err) {
+    console.error(err);
+  }
+  promptUser();
 };
 
-const updateEmployee = () => {};
-// first
-// last
-// query list of employees
-// select employee you want to update
-// do you want to update this employee
-// query titles
-// have option to change role/department/ delete
-// who is the manager?
-// list of managers
+const updateEmployee = async () => {
+  try {
+    const [employees] = await db
+      .promise()
+      .query("SELECT id, first_name, last_name FROM employee");
+
+    const employeeChoices = employees.map((employee) => ({
+      name: `${employee.first_name} ${employee.last_name}`,
+      value: employee.id,
+    }));
+
+    const selectedEmployeeAnswer = await inquirer.prompt([
+      {
+        type: "list",
+        name: "selectedEmployeeId",
+        message: "Select the employee you want to update:",
+        choices: employeeChoices,
+      },
+    ]);
+
+    const { selectedEmployeeId } = selectedEmployeeAnswer;
+
+    const [roles] = await db.promise().query("SELECT id, title FROM role");
+
+    const roleChoices = roles.map((role) => ({
+      name: role.title,
+      value: role.id,
+    }));
+
+    const selectedRoleAnswer = await inquirer.prompt([
+      {
+        type: "list",
+        name: "selectedRoleId",
+        message: "Select the new role for the employee:",
+        choices: roleChoices,
+      },
+    ]);
+
+    const { selectedRoleId } = selectedRoleAnswer;
+
+    await db
+      .promise()
+      .query("UPDATE employee SET role_id = ? WHERE id = ?", [
+        selectedRoleId,
+        selectedEmployeeId,
+      ]);
+
+    console.log("Employee role updated successfully!");
+  } catch (err) {
+    console.error("Error updating employee role:", err);
+  }
+
+  promptUser();
+};
