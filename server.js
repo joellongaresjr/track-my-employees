@@ -17,7 +17,6 @@ db.connect((err) => {
     console.error(err);
     return;
   }
-  console.log(err);
   promptUser();
 });
 
@@ -139,7 +138,7 @@ const addNewDepartment = async () => {
         message: "What is the name of the department you wish to add?", // prompting user of what dept they wish to add
       },
     ]);
-    const departmentName = answer.departmentName; // once the user provides us their information of the new dept, the 'answer' object is then extracted and stored in deptname variable
+    const departmentName = answer.departmentName; // once the user provides us their information of the new dept, the 'answer' object is then extracted and stored in deptname 
     await db
       .promise() 
       .query(`INSERT INTO department (name) VALUES ('${departmentName}')`); // once promise has been fulfilled, we then insert the new department (name) into our database 'VALUES $deptname'
@@ -197,6 +196,88 @@ const addNewRole = async () => {
   }
   promptUser();
 };
+// function that allows user to add a new employee to our database
+const addNewEmployee = async () => {
+  try { // prompting the user to enter the info of the new employee (first name, last name)
+    const employeeData = await inquirer.prompt([
+      {
+        type: "input",
+        name: "firstName",
+        message: "Enter the first name of the employee:",
+      },
+      {
+        type: "input",
+        name: "lastName",
+        message: "Enter the last name of the employee:",
+      },
+    ]);
+// extracting the first and last name from te responses of the user
+    const { firstName, lastName } = employeeData;
+// fetching a list of roles from the database
+    const [roles] = await db.promise().query("SELECT id, title FROM role");
+// mapping the roles to an array of choices for prompt to which we ask what's their specific role and who will be their manager
+    const roleChoices = roles.map((role) => ({
+      name: role.title,
+      value: role.id,
+    }));
+// prompt that asks the user to select the role
+    const roleAnswer = await inquirer.prompt([
+      {
+        type: "list",
+        name: "roleId",
+        message: "Select the role of the employee:",
+        choices: roleChoices,
+      },
+    ]);
+// extracting the selected role's ID from the answer object
+    const { roleId } = roleAnswer;
+// prompt the user to confirm if the employee has a manager or not 
+    const managerAnswer = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "hasManager",
+        message: "Does the employee have a manager?",
+        default: true,
+      },
+    ]);
+// if condtion to which if the employee has a manager, we then fetch a list of those employees from our database
+    if (managerAnswer.hasManager) {
+      const [employees] = await db.promise().query("SELECT id, first_name, last_name FROM employee");
+
+      const managerChoices = employees.map((employee) => ({
+        name: `${employee.first_name} ${employee.last_name}`,
+        value: employee.id,
+      }));
+
+// thus prompting the user to select the manager of the employee 
+      const managerAnswer = await inquirer.prompt([
+        {
+          type: "list",
+          name: "managerId",
+          message: "Select the manager of the employee:",
+          choices: managerChoices,
+        },
+      ]);
+// extracting that selected manager's id from the answers object
+      const { managerId } = managerAnswer;
+      await db.promise().query( // inserting new employee's data to our db
+        "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",
+        [firstName, lastName, roleId, managerId]
+        );
+      } else { // awaiting if the employee doesn't have a manger ,
+                // inserting information only if the new employee doesn't have a manager to our db
+      await db.promise().query(
+        "INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?)",
+        [firstName, lastName, roleId]
+      );
+    }
+
+    console.log(`Added ${firstName} ${lastName} to employees!`);
+    promptUser();
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 // Function to that updates our employee table
 const updateEmployee = async () => {
@@ -237,7 +318,7 @@ const updateEmployee = async () => {
         choices: roleChoices,
       },
     ]);
-// extracting the id of the selected role from the user's answer
+// extracting the id of the selected role from the user's answer object
     const { selectedRoleId } = selectedRoleAnswer;
 // once we receive this promise we then update the role of the employee in our database
     await db

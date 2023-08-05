@@ -1,37 +1,28 @@
 # track-my-employees
 ## Description 
-Welcome to "NoteQuest"! This is a simple note-taking application that will allow users to create, save, and delete notes. Users will have the opportunity to stores these notes and access them at any given moment! 
+Welcome to "Track-My-Employee"! This application provides a simple and efficient way to manage your employees and their respective departments right from your CLI interface. With "Track-My-Employees," you can easily view and add employees and departments. Furthermore, you have the flexibility to update employee salaries and roles, giving you full control over your business operations.
 
-Click on the delployed link from Heroku to embark on your Quest on Note-taking. 
 
 [Heroku.link](https://afternoon-stream-77923-18557e5e2777.herokuapp.com/)
 
 
-
-![Quest.logo](./images/QUEST%20PICUTRE.png)
-
-
-
 ## Technology Used
 * Node.js
-* Express
-* FS (File System)
-* UUID npm package
+* Inquirer 
+* MySql
 * Disclaimer: all these technologies/packages must be installed within your CLI before you can experience this application 
 
 ## Installation
 1. Clone repo 
-2. Navigate in your CLI to acces
+2. Navigate in your CLI to acces (RUN npm i)
 3. Install npm & all the necessary pacakges before deployment
 
 ## Code Highlights
 
-Here is a snippet for when I used the turnary way of writing code within my fs.writeFile
-I also broadcast the npm package (uuid) in this function
-![Turnary/uuid.sample](./images/Turnary%20Example.png)
 
 
 ## Learning Points
 
-* UUID an Npm built in package allowed me to execute this assignment. Using this package allowed me give each note a unique id and calling on that particular note that the user inputs to our database (db.json)
-* (Turnary) using this method instead of (if/else) by default makes everything look prettier and saving space within our code. My tutor from the Berkley Coding Extension shared this valuable insight with me, and I'm grateful for the knowledge they imparted. Implementing this approach proves advantageous in the long run, as it minimizes code space usage. In real-world scenarios, optimizing code space becomes crucial, especially when dealing with databases and constant information being passed on. 
+* This assignment from Berkley's Extension Program provided me with a valuable learning opportunity to gain a deeper understanding of MySQL. It allowed me to practice using SQL language to construct a table based on our query database, enhancing my skills in working with databases and data manipulation.
+
+* I'm very excited to be learning this material because I hope to incorpate these valuable knowledge to implement in my logistics business
