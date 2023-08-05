@@ -1,6 +1,6 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
-const cTable = require("console.table"); 
+const cTable = require("console.table");
 
 const db = mysql.createConnection(
   {
@@ -20,7 +20,7 @@ db.connect((err) => {
   promptUser();
 });
 
-// using npm 'inquirer' to prompt questions to our user, 
+// using npm 'inquirer' to prompt questions to our user,
 const promptUser = () => {
   inquirer
     .prompt([
@@ -42,7 +42,7 @@ const promptUser = () => {
     ])
     .then((answers) => {
       const { choice } = answers; // extracting our users choices from answers object
-// applying a switch statment to help us determine the actions required to assist the user through our prompt
+      // applying a switch statment to help us determine the actions required to assist the user through our prompt
       switch (choice) {
         case "View all departments":
           viewAllDepartments();
@@ -92,20 +92,19 @@ const viewAllDepartments = async () => {
     console.log("");
     console.log("***** LIST OF YOUR DEPARTMENTS *****"); // cute way of displaying our tables to the user (kawaii desu ne)
     console.log("");
-    console.table(results); 
+    console.table(results);
   } catch (err) {
     throw err;
   }
-  promptUser(); // mainlly used throughout our code but this prompts the user back to the main menu 
+  promptUser(); // mainlly used throughout our code but this prompts the user back to the main menu
 };
 // Function that allows users to see all Roles
 const viewAllRoles = async () => {
   try {
-    const [results] = await db
-      .promise()
-      .query( // I hated this portion of the assignment because this query is by far too complex, but that's my fault for making my data for my tables to complex)
-        "SELECT role.department_id AS id, role.title, role.salary, department.name AS department FROM role INNER JOIN department ON role.department_id = department.id;"
-      );// initially we use 'Inner Join' to create a relationship between deparment and role table, displaying our columns according, ex(role.department_id as id) 
+    const [results] = await db.promise().query(
+      // I hated this portion of the assignment because this query is by far too complex, but that's my fault for making my data for my tables to complex)
+      "SELECT role.department_id AS id, role.title, role.salary, department.name AS department FROM role INNER JOIN department ON role.department_id = department.id;"
+    ); // initially we use 'Inner Join' to create a relationship between deparment and role table, displaying our columns according, ex(role.department_id as id)
     console.log("****** LIST OF YOUR ROLES ******");
     console.table(results);
   } catch (err) {
@@ -116,11 +115,10 @@ const viewAllRoles = async () => {
 
 const viewAllEmployees = async () => {
   try {
-    const [results] = await db
-      .promise()
-      .query(// this most complex query of them all!! added a new sql method 'CONCAT' which allows to associate first & last name of the manager to associate with their respected employee
-        "SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id LEFT JOIN employee manager ON employee.manager_id = manager.id;"
-      ); // overall this query gives us the access of infomration about employees and their specific roles within the company and identifying all departments, salary, roles and corresponding managers of those employees
+    const [results] = await db.promise().query(
+      // this most complex query of them all!! added a new sql method 'CONCAT' which allows to associate first & last name of the manager to associate with their respected employee
+      "SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id LEFT JOIN employee manager ON employee.manager_id = manager.id;"
+    ); // overall this query gives us the access of infomration about employees and their specific roles within the company and identifying all departments, salary, roles and corresponding managers of those employees
     console.log("***** List OF YOUR EMPLOYEES ******");
     console.table(results);
   } catch (err) {
@@ -138,9 +136,9 @@ const addNewDepartment = async () => {
         message: "What is the name of the department you wish to add?", // prompting user of what dept they wish to add
       },
     ]);
-    const departmentName = answer.departmentName; // once the user provides us their information of the new dept, the 'answer' object is then extracted and stored in deptname 
+    const departmentName = answer.departmentName; // once the user provides us their information of the new dept, the 'answer' object is then extracted and stored in deptname
     await db
-      .promise() 
+      .promise()
       .query(`INSERT INTO department (name) VALUES ('${departmentName}')`); // once promise has been fulfilled, we then insert the new department (name) into our database 'VALUES $deptname'
     console.log(`${departmentName} added to department list`);
   } catch (err) {
@@ -148,13 +146,13 @@ const addNewDepartment = async () => {
   }
   promptUser();
 };
-// function that allows users to add a new role 
+// function that allows users to add a new role
 const addNewRole = async () => {
-  try { // prompt our user for role & salary 
-    const answer = await inquirer.prompt([ 
+  try {
+    // prompt our user for role & salary
+    const answer = await inquirer.prompt([
       {
         type: "input",
-        name: "roleName",
         message: "What role do you want to add?",
       },
       {
@@ -163,19 +161,19 @@ const addNewRole = async () => {
         message: "What is the salary of this role?",
       },
     ]);
-// extracrting answers the user provided (rolename & salary)
+    // extracrting answers the user provided (rolename & salary)
     const roleName = answer.roleName;
     const salary = answer.salary;
-// fetch all depts from the data to allow the user to choose which dept the new role will belong to 
+    // fetch all depts from the data to allow the user to choose which dept the new role will belong to
     const [departments] = await db
       .promise()
       .query("SELECT name, id FROM department");
-// mapping our departments into an array of choices (giving that dept a name, and new coressponding id)
+    // mapping our departments into an array of choices (giving that dept a name, and new coressponding id)
     const departmentChoices = departments.map(({ name, id }) => ({
       name: name,
       value: id,
-    })); 
-// prompting the user to select where the new role will be selected within the company (hence, deptchoice)
+    }));
+    // prompting the user to select where the new role will be selected within the company (hence, deptchoice)
     const deptChoice = await inquirer.prompt([
       {
         type: "list",
@@ -185,9 +183,9 @@ const addNewRole = async () => {
       },
     ]);
     const departmentId = deptChoice.departmentId; // extracting the department ID selected by the user!
-// SQL template to insert the new role into the data base
+    // SQL template to insert the new role into the data base
     const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
-// awaiting a promise to insert a new role into the data base from the provided values (role name, salary, & coreresponding deptid)
+    // awaiting a promise to insert a new role into the data base from the provided values (role name, salary, & coreresponding deptid)
     await db.promise().query(sql, [roleName, salary, departmentId]);
 
     console.log(`Added ${roleName} to the company!`);
@@ -198,7 +196,8 @@ const addNewRole = async () => {
 };
 // function that allows user to add a new employee to our database
 const addNewEmployee = async () => {
-  try { // prompting the user to enter the info of the new employee (first name, last name)
+  try {
+    // prompting the user to enter the info of the new employee (first name, last name)
     const employeeData = await inquirer.prompt([
       {
         type: "input",
@@ -211,16 +210,16 @@ const addNewEmployee = async () => {
         message: "Enter the last name of the employee:",
       },
     ]);
-// extracting the first and last name from te responses of the user
+    // extracting the first and last name from te responses of the user
     const { firstName, lastName } = employeeData;
-// fetching a list of roles from the database
+    // fetching a list of roles from the database
     const [roles] = await db.promise().query("SELECT id, title FROM role");
-// mapping the roles to an array of choices for prompt to which we ask what's their specific role and who will be their manager
+    // mapping the roles to an array of choices for prompt to which we ask what's their specific role and who will be their manager
     const roleChoices = roles.map((role) => ({
       name: role.title,
       value: role.id,
     }));
-// prompt that asks the user to select the role
+    // prompt that asks the user to select the role
     const roleAnswer = await inquirer.prompt([
       {
         type: "list",
@@ -229,9 +228,9 @@ const addNewEmployee = async () => {
         choices: roleChoices,
       },
     ]);
-// extracting the selected role's ID from the answer object
+    // extracting the selected role's ID from the answer object
     const { roleId } = roleAnswer;
-// prompt the user to confirm if the employee has a manager or not 
+    // prompt the user to confirm if the employee has a manager or not
     const managerAnswer = await inquirer.prompt([
       {
         type: "confirm",
@@ -240,16 +239,18 @@ const addNewEmployee = async () => {
         default: true,
       },
     ]);
-// if condtion to which if the employee has a manager, we then fetch a list of those employees from our database
+    // if condtion to which if the employee has a manager, we then fetch a list of those employees from our database
     if (managerAnswer.hasManager) {
-      const [employees] = await db.promise().query("SELECT id, first_name, last_name FROM employee");
+      const [employees] = await db
+        .promise()
+        .query("SELECT id, first_name, last_name FROM employee");
 
       const managerChoices = employees.map((employee) => ({
         name: `${employee.first_name} ${employee.last_name}`,
         value: employee.id,
       }));
 
-// thus prompting the user to select the manager of the employee 
+      // thus prompting the user to select the manager of the employee
       const managerAnswer = await inquirer.prompt([
         {
           type: "list",
@@ -258,18 +259,22 @@ const addNewEmployee = async () => {
           choices: managerChoices,
         },
       ]);
-// extracting that selected manager's id from the answers object
+      // extracting that selected manager's id from the answers object
       const { managerId } = managerAnswer;
-      await db.promise().query( // inserting new employee's data to our db
+      await db.promise().query(
+        // inserting new employee's data to our db
         "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",
         [firstName, lastName, roleId, managerId]
-        );
-      } else { // awaiting if the employee doesn't have a manger ,
-                // inserting information only if the new employee doesn't have a manager to our db
-      await db.promise().query(
-        "INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?)",
-        [firstName, lastName, roleId]
       );
+    } else {
+      // awaiting if the employee doesn't have a manger ,
+      // inserting information only if the new employee doesn't have a manager to our db
+      await db
+        .promise()
+        .query(
+          "INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?)",
+          [firstName, lastName, roleId]
+        );
     }
 
     console.log(`Added ${firstName} ${lastName} to employees!`);
@@ -286,12 +291,12 @@ const updateEmployee = async () => {
       .promise()
       .query("SELECT id, first_name, last_name FROM employee");
 
-      // creating an array of choices for the user by the corresponding name/id
+    // creating an array of choices for the user by the corresponding name/id
     const employeeChoices = employees.map((employee) => ({
       name: `${employee.first_name} ${employee.last_name}`,
       value: employee.id,
     }));
-// Prompt the user to select the employee they wish to update
+    // Prompt the user to select the employee they wish to update
     const selectedEmployeeAnswer = await inquirer.prompt([
       {
         type: "list",
@@ -299,17 +304,17 @@ const updateEmployee = async () => {
         message: "Select the employee you want to update:",
         choices: employeeChoices,
       },
-    ]); 
-// extracting the id of the selected employee from which the user provided (once the promise has been fulfilled)
+    ]);
+    // extracting the id of the selected employee from which the user provided (once the promise has been fulfilled)
     const { selectedEmployeeId } = selectedEmployeeAnswer;
-// fetching the list of roles from our database 
+    // fetching the list of roles from our database
     const [roles] = await db.promise().query("SELECT id, title FROM role");
 
     const roleChoices = roles.map((role) => ({
       name: role.title,
       value: role.id,
     }));
-// Prompting our user to select the new role from the employee they selected
+    // Prompting our user to select the new role from the employee they selected
     const selectedRoleAnswer = await inquirer.prompt([
       {
         type: "list",
@@ -318,9 +323,9 @@ const updateEmployee = async () => {
         choices: roleChoices,
       },
     ]);
-// extracting the id of the selected role from the user's answer object
+    // extracting the id of the selected role from the user's answer object
     const { selectedRoleId } = selectedRoleAnswer;
-// once we receive this promise we then update the role of the employee in our database
+    // once we receive this promise we then update the role of the employee in our database
     await db
       .promise()
       .query("UPDATE employee SET role_id = ? WHERE id = ?", [
